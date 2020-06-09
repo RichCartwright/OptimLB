@@ -3,6 +3,7 @@ CXXFLAGS = -std=c++2a -Wall -O3 -march=native -ffp-contract=fast -I/usr/local/in
 OBJECTS = main.o
 
 main: $(OBJECTS)
-		$(CXX) $(CXXFLAGS) -o $@ $^
-
+		$(CXX) $(CXXFLAGS) -o optimLB $^
+clean:
+	rm $(OBJECTS) optimLB
 $(OBJECTS): 
