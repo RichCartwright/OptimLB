@@ -81,11 +81,10 @@ int main(int argc, char** argv)
     }
     
     // First, let read the CSV data and get the matrix
-    FuncOptData* optData = new FuncOptData();
-    optData->X = ReadCSV(fileLoc);
-   
+    FuncOptData optData;
+    optData.X = ReadCSV(fileLoc);
     // This is the intial vector - it will also be the final result vector!
-    arma::vec x(3);
+    arma::colvec x(3);
     x.fill(1);
 
     // Configure the settings for the optimiser
@@ -112,8 +111,9 @@ int main(int argc, char** argv)
     
     // Run the optimiser
     bool success = optim::gd(x, GetMI, &optData, optiSettings);
-
+    
+    std::cout << x << std::endl;
     // clean up and return main
-    delete optData;
+    //delete optData;
     return 0;
 }
