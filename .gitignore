@@ -31,3 +31,6 @@
 *.out
 *.app
 optimLB
+
+# Crash logs
+*.0.json
