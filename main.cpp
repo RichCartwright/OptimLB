@@ -10,7 +10,7 @@ struct FuncOptData
     arma::mat X; // This will be the whole data matrix for lookup
 };
 
-double GetMI(const arma::vec& input_vals, arma::vec* grad_out, void* opt_data)
+double GetMI(const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)
 {
     FuncOptData* optData = reinterpret_cast<FuncOptData*>(opt_data);
     
@@ -23,6 +23,7 @@ double GetMI(const arma::vec& input_vals, arma::vec* grad_out, void* opt_data)
         std::cout << "Function needs optional data" << std::endl;
         return 0.0;
     }
+    return 0.0;
 }
 
 arma::mat ReadCSV(const std::string &filename, const std::string &delimiter = ",")
@@ -84,8 +85,8 @@ int main(int argc, char** argv)
     optData->X = ReadCSV(fileLoc);
    
     // This is the intial vector - it will also be the final result vector!
-    arma::vec* x = new arma::vec(3);
-    x->fill(1);
+    arma::vec x(3);
+    x.fill(1);
 
     // Configure the settings for the optimiser
     optim::algo_settings_t optiSettings;
@@ -102,7 +103,8 @@ int main(int argc, char** argv)
      * 4 = RMSProp ("ada_rho")                                                                     /
      * 5 = AdaDelta                                                                                /
      * 6 = Adam (adaptive Moment Estimation) and AdaMax                                            /
-     */                                              
+     */
+
     optiSettings.gd_method = 6; 
     optiSettings.gd_settings.step_size = 0.1;
 
@@ -113,6 +115,5 @@ int main(int argc, char** argv)
 
     // clean up and return main
     delete optData;
-    delete x;
     return 0;
 }
