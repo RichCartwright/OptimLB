@@ -4,6 +4,27 @@
 
 #include "optim.hpp"
 
+struct FuncOptData
+{   
+    // I figured I would just make this a struct so we know 100% that we're casting to the right thing
+    arma::mat X; // This will be the whole data matrix for lookup
+};
+
+double GetMI(const arma::vec& input_vals, arma::vec* grad_out, void* opt_data)
+{
+    FuncOptData* optData = reinterpret_cast<FuncOptData*>(opt_data);
+    
+    if(optData !=  nullptr)
+    {
+        arma::mat X = optData->X;
+    }
+    else
+    {
+        std::cout << "Function needs optional data" << std::endl;
+        return 0.0;
+    }
+}
+
 arma::mat ReadCSV(const std::string &filename, const std::string &delimiter = ",")
 {
     std::ifstream csv(filename);
@@ -50,16 +71,48 @@ int main(int argc, char** argv)
     {
         fileLoc = argv[1];
         
-        // This is C++17 and up only - A bit naughty really but the only way I know how to check without using posix stat()
+        // This is C++17 and up only - A bit naughty, really but the only way I know how to check without using posix stat()
         if(!std::filesystem::exists(fileLoc))
         {
             std::cout << "Argument given is not a file" << std::endl;
             return 1;
         }
     }
+    
+    // First, let read the CSV data and get the matrix
+    FuncOptData* optData = new FuncOptData();
+    optData->X = ReadCSV(fileLoc);
+   
+    // This is the intial vector - it will also be the final result vector!
+    arma::vec* x = new arma::vec(3);
+    x->fill(1);
 
-    arma::mat hemelbData = ReadCSV(fileLoc);
-    std::cout << hemelbData << std::endl;    
+    // Configure the settings for the optimiser
+    optim::algo_settings_t optiSettings;
+    
+    //############################################################################################//
+    // These settings are dependent on the optimiser used. I'll think of a smart solution for this /
+    // but for now, it's best to just comment out what we dont need                                /
+    /*                                                                                             /
+     * Gradient decent methods (gd_method)                                                         /
+     * 0 = basic GD                                                                                /
+     * 1 = GD with momentum (governed by "momentum_par")                                           /
+     * 2 = Nesterov accelerated (NAG)                                                              /
+     * 3 = AdaGrad (used a normalisation term "norm_term")                                         /
+     * 4 = RMSProp ("ada_rho")                                                                     /
+     * 5 = AdaDelta                                                                                /
+     * 6 = Adam (adaptive Moment Estimation) and AdaMax                                            /
+     */                                              
+    optiSettings.gd_method = 6; 
+    optiSettings.gd_settings.step_size = 0.1;
 
+    // END settings
+    
+    // Run the optimiser
+    bool success = optim::gd(x, GetMI, &optData, optiSettings);
+
+    // clean up and return main
+    delete optData;
+    delete x;
     return 0;
 }
