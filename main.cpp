@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <iostream>
 #include <filesystem>
+#include <limits>
+#include <Python.h>
 
 #include "optim.hpp"
-#include "Python.h"
 
 struct FuncOptData
 {   
@@ -13,17 +14,36 @@ struct FuncOptData
 
 double GetMI(const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)
 {
+    arma::mat x; 
     FuncOptData* optData = reinterpret_cast<FuncOptData*>(opt_data);
     
     if(optData !=  nullptr)
     {
-        arma::mat X = optData->X;
+        // let us save the matrix, this is a bit wasteful with a copy but we can sort it out later
+        x = optData->X.t();
     }
     else
     {
         std::cout << "Function needs optional data" << std::endl;
         return 0.0;
     }
+    
+    // First lets get a sub view of all the matrice's(?) theta values
+    arma::mat thetaVals = x(1, arma::span(0,x.n_cols-1));
+    arma::uvec idx = arma::sort_index(thetaVals);
+    //std::cout << idx << std::endl;
+    
+    arma::mat sorted = x.cols(idx);
+    arma::uvec idxA = {1,3,4};
+    std::cout << sorted.cols(idxA) << std::endl;
+    // this filters out column indexes!
+    //arma::uvec idx = {1, 3, 5}; 
+    //std::cout << x.cols(idx) << std::endl;
+    //std::cout << vals_inp << std::endl; 
+    
+    // Now for the messy shit because armadillo does NOTHING
+
+    //std::cout << x.n_cols << " " << x.n_rows << std::endl;
     return 0.0;
 }
 
@@ -85,8 +105,7 @@ int main(int argc, char** argv)
     FuncOptData optData;
     optData.X = ReadCSV(fileLoc);
     // This is the intial vector - it will also be the final result vector!
-    arma::colvec x(3);
-    x.fill(1);
+    arma::vec x = {1,2,3};
 
     // Configure the settings for the optimiser
     optim::algo_settings_t optiSettings;
@@ -107,14 +126,11 @@ int main(int argc, char** argv)
 
     optiSettings.gd_method = 6; 
     optiSettings.gd_settings.step_size = 0.1;
-
     // END settings
     
     // Run the optimiser
     bool success = optim::gd(x, GetMI, &optData, optiSettings);
     
-    std::cout << x << std::endl;
     // clean up and return main
-    //delete optData;
     return 0;
 }
