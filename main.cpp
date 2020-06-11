@@ -3,6 +3,7 @@
 #include <filesystem>
 
 #include "optim.hpp"
+#include "Python.h"
 
 struct FuncOptData
 {   
