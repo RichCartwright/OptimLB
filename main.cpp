@@ -28,23 +28,40 @@ double GetMI(const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)
         return 0.0;
     }
     
+    // NOTE:    The way im doing this has its flaws, if I use this data directly the way it is ill need to address it.
+    //          It uses the Theta value as the most important when filtering, with the rotation (or last) value of the least importance.
+    //          
+    //
     // First lets get a sub view of all the matrice's(?) theta values
+    // then get an index to the closest value!
     arma::mat thetaVals = x(1, arma::span(0,x.n_cols-1));
-    arma::uvec idx = arma::sort_index(thetaVals);
-    //std::cout << idx << std::endl;
+    //Lets get the closest theta value!
+    double closestThetaIdx = arma::abs(thetaVals - vals_inp[0]).index_min();
+    std::cout << thetaVals(closestThetaIdx) << std::endl;
     
-    arma::mat sorted = x.cols(idx);
-    arma::uvec idxA = {1,3,4};
-    std::cout << sorted.cols(idxA) << std::endl;
-    // this filters out column indexes!
-    //arma::uvec idx = {1, 3, 5}; 
-    //std::cout << x.cols(idx) << std::endl;
-    //std::cout << vals_inp << std::endl; 
-    
-    // Now for the messy shit because armadillo does NOTHING
+    // Due to the nature of arma::find, we need to pass in an unsorted matrix subview
+    //  then we can get the indices to apply to the full matrix
+    arma::uvec finalThetaIdx = arma::find(thetaVals == thetaVals(closestThetaIdx));
+    // This is why we took a copy, we can fuck directly with it at the end of each step
+    x = x.cols(finalThetaIdx);
 
-    //std::cout << x.n_cols << " " << x.n_rows << std::endl;
-    return 0.0;
+    // Now we need to do the same for Phi...
+    //  TODO: We're copying a tonne of code here, put it in a loop...
+    arma::mat phiVals = x(2, arma::span(0,x.n_cols-1));
+    double closestPhiIdx = arma::abs(phiVals - vals_inp[1]).index_min();
+    arma::uvec finalPhiIdx = arma::find(phiVals == phiVals(closestPhiIdx));
+    x = x.cols(finalPhiIdx);
+
+    // And now for the alpha (zoom)...
+    arma::mat alphaVals = x(3, arma::span(0,x.n_cols-1));
+    double closestAlphaIdx = arma::abs(alphaVals - vals_inp[2]).index_min();
+    arma::uvec finalAlphaIdx = arma::find(alphaVals == alphaVals(closestAlphaIdx));
+    x = x.cols(finalAlphaIdx);
+
+    // Negate and return the MI of the result
+    // NOTE: we don't need to worry about columns and rows here, 
+    //       a 1D accessor to a matrix will assume its flat like a memory ptr
+    return x(4);
 }
 
 arma::mat ReadCSV(const std::string &filename, const std::string &delimiter = ",")
@@ -105,7 +122,8 @@ int main(int argc, char** argv)
     FuncOptData optData;
     optData.X = ReadCSV(fileLoc);
     // This is the intial vector - it will also be the final result vector!
-    arma::vec x = {1,2,3};
+    arma::vec x = {9,2,3};
+
 
     // Configure the settings for the optimiser
     optim::algo_settings_t optiSettings;
@@ -129,8 +147,8 @@ int main(int argc, char** argv)
     // END settings
     
     // Run the optimiser
-    bool success = optim::gd(x, GetMI, &optData, optiSettings);
-    
+    bool success = optim::nm(x, GetMI, &optData, optiSettings);
+    std::cout << x << std::endl; 
     // clean up and return main
     return 0;
 }
