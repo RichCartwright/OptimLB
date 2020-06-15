@@ -1,10 +1,30 @@
-CXX = g++
-CXXFLAGS = -std=c++2a -Wall -O3 -march=native -ffp-contract=fast -I/usr/local/include/optim -I/usr/include/python3.8
-LIBFLAG = -L/usr/local/lib -loptim -fopenmp -lpython3.8
-OBJECTS = main.o
+SRC_DIR := src
+OBJ_DIR := obj
+BIN_DIR := bin
 
-main: $(OBJECTS)
-		$(CXX) $(CXXFLAGS) -o optimLB $^ $(LIBFLAG)
+EXE := optimLB
+SRC := $(wildcard $(SRC_DIR)/*.cpp)
+OBJ := $(SRC:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+
+CPPFLAGS := -Iinclude -std=c++2a -march=native -ffp-contract=fast -I/usr/local/include/optim -I/usr/include/python3.8
+CFLAGS := -Wall -O3 
+LDFLAGS := -Llib -L/usr/local/lib
+LDLIBS := -lm -loptim -fopenmp -lpython3.8
+
+.PHONY: all clean
+
+all: $(EXE)
+
+$(EXE): $(OBJ) | $(BIN_DIR)
+	$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
+	$(CXX) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+$(BIN_DIR) $(OBJ_DIR):
+	mkdir -p $@
+
 clean:
-	rm $(OBJECTS) optimLB
-$(OBJECTS): 
+	@$(RM) -rv $(BIN_DIR) $(OBJ_DIR)
+
+-include $(OBJ:.o=.d)
