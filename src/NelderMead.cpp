@@ -1,4 +1,4 @@
-#include "neldermead.h"
+#include "NelderMead.h"
 
 bool NelderMead::RunOptimiser(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data)
 {

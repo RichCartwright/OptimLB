@@ -21,6 +21,10 @@ class Optimiser
             }
         }
         
+        virtual ~Optimiser()
+        {
+            delete algoSettings;
+        }
         virtual bool RunOptimiser() = 0;
         
         // These settings seem to be shared by ALL the optimisation methods

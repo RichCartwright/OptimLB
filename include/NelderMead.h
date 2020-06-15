@@ -1,7 +1,7 @@
 #ifndef __NELDERMEAD_H__
 #define __NELDERMEAD_H__
 
-#include "optimiser.h"
+#include "Optimiser.h"
 
 class NelderMead : public Optimiser
 {
