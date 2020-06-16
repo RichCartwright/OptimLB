@@ -36,14 +36,14 @@ arma::mat GetClosestMatrixCol(arma::mat& inMat, int col, double inputVal)
 
 double GetMI(const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)
 {
-    FuncOptData* optData = reinterpret_cast<FuncOptData*>(opt_data);
     arma::mat x;
+    FuncOptData* optData = reinterpret_cast<FuncOptData*>(opt_data);
     
     if(optData !=  nullptr)
     {
         // let us save the matrix, this is a bit wasteful with a copy but we can sort it out later
+
         x = optData->X.t();
-        std::cout << "Saved the matrix" << std::endl;
     }
     if(optData == nullptr)
     {
@@ -54,7 +54,6 @@ double GetMI(const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)
     x = GetClosestMatrixCol(x, 1, vals_inp[0]); // Theta
     x = GetClosestMatrixCol(x, 2, vals_inp[1]); // Phi
     x = GetClosestMatrixCol(x, 3, vals_inp[2]); // Alpha
-    std::cout << "Figured closest val" << std::endl;
     
     // Negate and return the MI of the result
     // NOTE: we don't need to worry about columns and rows here, 
@@ -128,7 +127,6 @@ int main(int argc, char** argv)
     gd->SetStepSize(0.1);
     gd->RunOptimiser(x, GetMI, &optData);
 
-    std::cout << x << std::endl;
     // Run the optimiser
     //bool success = optim::nm(x, GetMI, &optData, optiSettings);
     // clean up and return main
