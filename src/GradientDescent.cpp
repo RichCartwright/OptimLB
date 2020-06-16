@@ -13,3 +13,35 @@ void GradientDescent::SetGDMethod(GDMethod gdMethod)
        algoSettings->gd_method = static_cast<int>(gdMethod);
    }
 }
+
+void GradientDescent::SetStepSize(double param)
+{
+    algoSettings->gd_settings.step_size = param;
+}
+
+void GradientDescent::SetMomentum(double param)
+{
+    algoSettings->gd_settings.momentum_par = param;
+}
+
+void GradientDescent::SetNormTerm(double param)
+{
+    algoSettings->gd_settings.norm_term = param;
+}
+
+
+void GradientDescent::SetLearningScale(double param)
+{
+    algoSettings->gd_settings.ada_rho = param;
+}
+
+void GradientDescent::SetAdamBeta(double betaX, double betaY)
+{
+    algoSettings->gd_settings.adam_beta_1 = betaX;
+    algoSettings->gd_settings.adam_beta_2 = betaY;
+}
+
+void GradientDescent::SetAdaMax(bool param)
+{
+    algoSettings->gd_settings.ada_max = param;
+}

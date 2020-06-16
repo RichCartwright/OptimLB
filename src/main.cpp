@@ -1,14 +1,20 @@
+#if !defined(ARMA_64BIT_WORD)
+    #define ARMA_64BIT_WORD
+#endif
 #include <stdio.h>
 #include <iostream>
 #include <filesystem>
 #include <limits>
 #include <Python.h>
+#include <optim.hpp>
 
-#include "optim.hpp"
+#include "GradientDescent.h"
+#include "NelderMead.h"
+
 
 struct FuncOptData
 {   
-    // I figured I would just make this a struct so we know 100% that we're casting to the right thing
+    // I've made the "optdata" a struct so we know what we are unpacking
     arma::mat X; // This will be the whole data matrix for lookup
 };
 
@@ -30,15 +36,16 @@ arma::mat GetClosestMatrixCol(arma::mat& inMat, int col, double inputVal)
 
 double GetMI(const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)
 {
-    arma::mat x; 
     FuncOptData* optData = reinterpret_cast<FuncOptData*>(opt_data);
+    arma::mat x;
     
     if(optData !=  nullptr)
     {
         // let us save the matrix, this is a bit wasteful with a copy but we can sort it out later
         x = optData->X.t();
+        std::cout << "Saved the matrix" << std::endl;
     }
-    else
+    if(optData == nullptr)
     {
         std::cout << "Function needs optional data" << std::endl;
         return 0.0;
@@ -47,31 +54,8 @@ double GetMI(const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)
     x = GetClosestMatrixCol(x, 1, vals_inp[0]); // Theta
     x = GetClosestMatrixCol(x, 2, vals_inp[1]); // Phi
     x = GetClosestMatrixCol(x, 3, vals_inp[2]); // Alpha
-    // First lets get a sub view of all the matrice's(?) theta values
-    // then get an index to the closest value!
-    //arma::mat thetaVals = x(1, arma::span(0,x.n_cols-1));
-    //Lets get the closest theta value!
-    //double closestThetaIdx = arma::abs(thetaVals - vals_inp[0]).index_min();
-    //std::cout << thetaVals(closestThetaIdx) << std::endl;
+    std::cout << "Figured closest val" << std::endl;
     
-   // arma::uvec finalThetaIdx = arma::find(thetaVals == thetaVals(closestThetaIdx));
-    // This is why we took a copy, we can fuck directly with it at the end of each step
-    //x = x.cols(finalThetaIdx);
-
-    // Now we need to do the same for Phi...
-    //  TODO: We're copying a tonne of code here, put it in a loop...
-    //arma::mat phiVals = x(2, arma::span(0,x.n_cols-1));
-    //double closestPhiIdx = arma::abs(phiVals - vals_inp[1]).index_min();
-    //arma::uvec finalPhiIdx = arma::find(phiVals == phiVals(closestPhiIdx));
-    //x = x.cols(finalPhiIdx);
-
-    // And now for the alpha (zoom)...
-    //arma::mat alphaVals = x(3, arma::span(0,x.n_cols-1));
-    //double closestAlphaIdx = arma::abs(alphaVals - vals_inp[2]).index_min();
-    //arma::uvec finalAlphaIdx = arma::find(alphaVals == alphaVals(closestAlphaIdx));
-    //x = x.cols(finalAlphaIdx);
-
-    std::cout << x << std::endl;
     // Negate and return the MI of the result
     // NOTE: we don't need to worry about columns and rows here, 
     //       a 1D accessor to a matrix will assume its flat like a memory ptr
@@ -135,33 +119,19 @@ int main(int argc, char** argv)
     // First, let read the CSV data and get the matrix
     FuncOptData optData;
     optData.X = ReadCSV(fileLoc);
+    
     // This is the intial vector - it will also be the final result vector!
     arma::colvec x = {9,9,-6};
 
+    GradientDescent* gd = new GradientDescent();
+    gd->SetGDMethod(GDMethod::Basic);
+    gd->SetStepSize(0.1);
+    gd->RunOptimiser(x, GetMI, &optData);
 
-    // Configure the settings for the optimiser
-    optim::algo_settings_t optiSettings;
-    
-    //############################################################################################//
-    // These settings are dependent on the optimiser used. I'll think of a smart solution for this /
-    // but for now, it's best to just comment out what we dont need                                /
-    /*                                                                                             /
-     * Gradient decent methods (gd_method)                                                         /
-     * 0 = basic GD                                                                                /
-     * 1 = GD with momentum (governed by "momentum_par")                                           /
-     * 2 = Nesterov accelerated (NAG)                                                              /
-     * 3 = AdaGrad (used a normalisation term "norm_term")                                         /
-     * 4 = RMSProp ("ada_rho")                                                                     /
-     * 5 = AdaDelta                                                                                /
-     * 6 = Adam (adaptive Moment Estimation) and AdaMax                                            /
-     */
-
-    optiSettings.gd_method = 6; 
-    optiSettings.gd_settings.step_size = 0.1;
-    // END settings
-    
+    std::cout << x << std::endl;
     // Run the optimiser
-    bool success = optim::nm(x, GetMI, &optData, optiSettings);
+    //bool success = optim::nm(x, GetMI, &optData, optiSettings);
     // clean up and return main
+    delete gd;
     return 0;
 }

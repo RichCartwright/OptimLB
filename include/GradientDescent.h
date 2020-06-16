@@ -28,9 +28,17 @@ class GradientDescent : public Optimiser
 
         bool RunOptimiser(  arma::vec& init_out_vals, 
                             std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn,
-                            void* opt_data);
+                            void* opt_data) override;
         
         void SetGDMethod(GDMethod gdMethod);
+        void SetStepSize(double param);
+        void SetMomentum(double param);
+        void SetNormTerm(double param);
+        void SetLearningScale(double param);
+        void SetAdamBeta(double betaX, double betaY);
+        void SetAdaMax(bool param);
+
+
 };
 
 #endif

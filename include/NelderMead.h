@@ -12,6 +12,8 @@ class NelderMead : public Optimiser
             // Calls the superclass first then comes here
         }
 
+        ~NelderMead(){}; 
+
         bool RunOptimiser(  arma::vec& init_out_vals, 
                             std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn,
                             void* opt_data);

@@ -6,7 +6,7 @@ EXE := optimLB
 SRC := $(wildcard $(SRC_DIR)/*.cpp)
 OBJ := $(SRC:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
-CPPFLAGS := -Iinclude -std=c++2a -march=native -ffp-contract=fast -I/usr/local/include/optim -I/usr/include/python3.8
+CPPFLAGS := -Iinclude -std=c++2a -DARMA_64BIT_WORD=1 -march=native -ffp-contract=fast -I/usr/local/include/optim -I/usr/include/python3.8
 CFLAGS := -Wall -O3 
 LDFLAGS := -Llib -L/usr/local/lib
 LDLIBS := -lm -loptim -fopenmp -lpython3.8
