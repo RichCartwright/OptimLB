@@ -2,6 +2,8 @@
 
 bool GradientDescent::RunOptimiser(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data)
 {
+    std::cout << algoSettings->gd_settings.step_size << std::endl;
+    
     // Run the optimiser, values will be updated in init_out_vals
     return optim::gd(init_out_vals, opt_objfn, opt_data, *algoSettings);
 }

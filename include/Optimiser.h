@@ -32,9 +32,24 @@ class Optimiser
         
         // These settings seem to be shared by ALL the optimisation methods
         // further specific functions are defined in their respective subclasses
-        void SetErrorTolerance(double err_tol);
-        void SetIterationMax(int iter_max);
-        void SetValueBoundary(arma::vec& lower, arma::vec& upper);
+        virtual void SetErrorTolerance(double param)
+        {
+            algoSettings->err_tol = param;
+        }
+        virtual void SetIterationMax(int param)
+        {
+            algoSettings->iter_max = param;
+        }
+
+        virtual void SetValueBoundary(arma::vec& lower, arma::vec& upper)
+        {
+            // This only matter if "vals_bound == true" - we should allow the setting anyway but warn
+            if(!algoSettings->vals_bound)
+                std::cout << "WARNING: vals_bound is set to false but you're setting the bounds" << std::endl;
+
+            algoSettings->lower_bounds = lower;
+            algoSettings->upper_bounds = upper;
+        }
 
     protected: 
         optim::algo_settings_t* algoSettings = nullptr; 

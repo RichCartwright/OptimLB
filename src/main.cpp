@@ -36,6 +36,8 @@ arma::mat GetClosestMatrixCol(arma::mat& inMat, int col, double inputVal)
 
 double GetMI(const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)
 {
+    std::cout << vals_inp << std::endl;
+
     arma::mat x;
     FuncOptData* optData = reinterpret_cast<FuncOptData*>(opt_data);
     
@@ -58,6 +60,7 @@ double GetMI(const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)
     // Negate and return the MI of the result
     // NOTE: we don't need to worry about columns and rows here, 
     //       a 1D accessor to a matrix will assume its flat like a memory ptr
+    std::cout << x(4)*-1 << std::endl;
     return x(4)*-1;
 }
 
@@ -120,13 +123,15 @@ int main(int argc, char** argv)
     optData.X = ReadCSV(fileLoc);
     
     // This is the intial vector - it will also be the final result vector!
-    arma::colvec x = {9,9,-6};
+    arma::colvec x = {120,120,-5};
 
     GradientDescent* gd = new GradientDescent();
-    gd->SetGDMethod(GDMethod::Basic);
-    gd->SetStepSize(0.1);
+    gd->SetGDMethod(GDMethod::Adam);
+    gd->SetStepSize(1e-10);
+    gd->SetErrorTolerance(1e-10);
     gd->RunOptimiser(x, GetMI, &optData);
-
+    
+    std::cout << x << std::endl;
     // Run the optimiser
     //bool success = optim::nm(x, GetMI, &optData, optiSettings);
     // clean up and return main
