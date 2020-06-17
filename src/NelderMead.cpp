@@ -2,8 +2,16 @@
 
 bool NelderMead::RunOptimiser(arma::vec& init_out_vals, std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn, void* opt_data)
 {
+    // Lets print out the settings first
+    PrintSettings();
     // Run the optimiser, values will be updated in init_out_vals
     return optim::nm(init_out_vals, opt_objfn, opt_data, *algoSettings);
+}
+
+void NelderMead::PrintSettings()
+{
+    Optimiser::PrintSettings();
+    std::cout << "--- Nelder Mead specific ---" << std::endl;
 }
 
 void NelderMead::ReflectionParam(double param)

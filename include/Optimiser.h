@@ -25,6 +25,7 @@ class Optimiser
         {
             delete algoSettings;
         }
+        
         virtual bool RunOptimiser(  arma::vec& init_out_vals,
                                     std::function<double (const arma::vec& vals_inp,
                                     arma::vec* grad_out, void* opt_data)> opt_objfn,
@@ -49,6 +50,24 @@ class Optimiser
 
             algoSettings->lower_bounds = lower;
             algoSettings->upper_bounds = upper;
+        }
+
+        virtual void PrintSettings()
+        {
+            if(algoSettings)
+            {
+                std::cout << "--- Optimisation Settings ----" << std::endl;
+                std::cout << "Error Tol: " << algoSettings->err_tol << "    " << "Max Iterations: " << algoSettings->iter_max << std::endl;
+                std::cout << "Value Boundaries: "; 
+                if(!algoSettings->vals_bound)
+                {   
+                    std::cout << "Value boundaries = false" << std::endl;
+                }
+                else
+                {
+                    std::cout << "Lower: " << algoSettings->lower_bounds << " - Upper:" << algoSettings->upper_bounds << std::endl;
+                }
+            }
         }
 
     protected: 

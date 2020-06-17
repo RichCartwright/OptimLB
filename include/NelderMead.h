@@ -16,8 +16,9 @@ class NelderMead : public Optimiser
 
         bool RunOptimiser(  arma::vec& init_out_vals, 
                             std::function<double (const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)> opt_objfn,
-                            void* opt_data);
+                            void* opt_data) override;
         
+        virtual void PrintSettings() override;
         void ReflectionParam(double param);
         void ExpansionParam(double param);
         void ContractionParam(double param);

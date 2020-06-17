@@ -8,9 +8,13 @@
 #include <Python.h>
 #include <optim.hpp>
 
+#include "matplotlibcpp.h" 
 #include "GradientDescent.h"
 #include "NelderMead.h"
+#include "ConjugateGradient.h"
+#include "BFGS.h"
 
+namespace plt = matplotlibcpp;
 
 struct FuncOptData
 {   
@@ -119,22 +123,34 @@ int main(int argc, char** argv)
     }
     
     // First, let read the CSV data and get the matrix
+    // We could just make this global, but we might aswell pass it
     FuncOptData optData;
     optData.X = ReadCSV(fileLoc);
     
     // This is the intial vector - it will also be the final result vector!
-    arma::vec x = {120,120,-5};
-
+    arma::vec initVec = {120,120,-5};
     GradientDescent* gd = new GradientDescent();
     gd->SetGDMethod(GDMethod::Basic);
     gd->SetStepSize(1e-10);
     gd->SetErrorTolerance(1e-10);
-    gd->RunOptimiser(x, GetMI, &optData);
+    //gd->RunOptimiser(initVec, GetMI, &optData);
     
-    std::cout << x << std::endl;
+    ConjugateGradient* cg = new ConjugateGradient();
+    cg->SetCGMethod(CGMethod::HagerZhang);
+    cg->SetErrorTolerance(1e-10);
+    //gd->RunOptimiser(initVec, GetMI, &optData);
+
+    NelderMead* nm = new NelderMead();
+    nm->SetErrorTolerance(1e-10);
+    nm->RunOptimiser(initVec, GetMI, &optData);
+    nm->ReflectionParam(1e-10);
+    nm->ExpansionParam(1e-10);
+    nm->ContractionParam(1e-10);
+    nm->ShrinkageParam(1e-10);
     // Run the optimiser
     //bool success = optim::nm(x, GetMI, &optData, optiSettings);
     // clean up and return main
     delete gd;
+    delete cg;
     return 0;
 }
