@@ -123,10 +123,10 @@ int main(int argc, char** argv)
     optData.X = ReadCSV(fileLoc);
     
     // This is the intial vector - it will also be the final result vector!
-    arma::colvec x = {120,120,-5};
+    arma::vec x = {120,120,-5};
 
     GradientDescent* gd = new GradientDescent();
-    gd->SetGDMethod(GDMethod::Adam);
+    gd->SetGDMethod(GDMethod::Basic);
     gd->SetStepSize(1e-10);
     gd->SetErrorTolerance(1e-10);
     gd->RunOptimiser(x, GetMI, &optData);
