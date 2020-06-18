@@ -61,6 +61,12 @@ double GetMI(const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)
     x = GetClosestMatrixCol(x, 2, vals_inp[1]); // Phi
     x = GetClosestMatrixCol(x, 3, vals_inp[2]); // Alpha
     
+    if(grad_out)
+    {
+        arma::colvec grad = {x(0), x(1), x(2)};
+        *grad_out = grad;
+    }
+
     // Negate and return the MI of the result
     // NOTE: we don't need to worry about columns and rows here, 
     //       a 1D accessor to a matrix will assume its flat like a memory ptr
@@ -130,15 +136,21 @@ int main(int argc, char** argv)
     // This is the intial vector - it will also be the final result vector!
     arma::vec initVec = {120,120,-5};
     GradientDescent* gd = new GradientDescent();
-    gd->SetGDMethod(GDMethod::Basic);
-    gd->SetStepSize(1e-10);
-    gd->SetErrorTolerance(1e-10);
-    //gd->RunOptimiser(initVec, GetMI, &optData);
+    gd->SetGDMethod(GDMethod::Adam);
+    gd->SetStepSize(50);
+    gd->SetErrorTolerance(1e-20);
+    
+    arma::vec lower = {0,0,-8};
+    arma::vec upper = {360, 360,-5};
+    gd->SetValueBoundary(lower, upper);
+    gd->SetValsBound(true);
+
+    gd->RunOptimiser(initVec, GetMI, &optData);
     
     ConjugateGradient* cg = new ConjugateGradient();
     cg->SetCGMethod(CGMethod::HagerZhang);
     cg->SetErrorTolerance(1e-10);
-    //gd->RunOptimiser(initVec, GetMI, &optData);
+    //cg->RunOptimiser(initVec, GetMI, &optData);
 
     NelderMead* nm = new NelderMead();
     nm->SetErrorTolerance(1e-10);
@@ -146,12 +158,16 @@ int main(int argc, char** argv)
     nm->ExpansionParam(1);
     nm->ContractionParam(1);
     nm->ShrinkageParam(1);
-    nm->RunOptimiser(initVec, GetMI, &optData);
-    // Run the optimiser
-    //bool success = optim::nm(x, GetMI, &optData, optiSettings);
+    //nm->RunOptimiser(initVec, GetMI, &optData);
+    
+    BFGS* bfgs = new BFGS(false);
+    bfgs->SetErrorTolerance(1e-10);
+    //bfgs->RunOptimiser(initVec, GetMI, &optData);
+
     // clean up and return main
     delete gd;
     delete cg;
     delete nm;
+    delete bfgs;
     return 0;
 }

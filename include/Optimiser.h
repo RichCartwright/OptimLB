@@ -42,12 +42,15 @@ class Optimiser
             algoSettings->iter_max = param;
         }
 
+        virtual void SetValsBound(bool param)
+        {
+            // This will segfault if the boundaries aren't set FIRST
+            // silly design, ill find a work around later
+            algoSettings->vals_bound = param;
+        }
+
         virtual void SetValueBoundary(arma::vec& lower, arma::vec& upper)
         {
-            // This only matter if "vals_bound == true" - we should allow the setting anyway but warn
-            if(!algoSettings->vals_bound)
-                std::cout << "WARNING: vals_bound is set to false but you're setting the bounds" << std::endl;
-
             algoSettings->lower_bounds = lower;
             algoSettings->upper_bounds = upper;
         }
