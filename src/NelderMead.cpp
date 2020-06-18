@@ -12,6 +12,8 @@ void NelderMead::PrintSettings()
 {
     Optimiser::PrintSettings();
     std::cout << "--- Nelder Mead specific ---" << std::endl;
+    std::cout << "Reflection: " << algoSettings->nm_par_alpha << "  Expansion: " << algoSettings->nm_par_gamma << std::endl;
+    std::cout << "Contraction: " << algoSettings->nm_par_beta << "  Shrinkage: " << algoSettings->nm_par_delta << std::endl;
 }
 
 void NelderMead::ReflectionParam(double param)

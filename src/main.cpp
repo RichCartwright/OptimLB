@@ -142,15 +142,16 @@ int main(int argc, char** argv)
 
     NelderMead* nm = new NelderMead();
     nm->SetErrorTolerance(1e-10);
+    nm->ReflectionParam(1);
+    nm->ExpansionParam(1);
+    nm->ContractionParam(1);
+    nm->ShrinkageParam(1);
     nm->RunOptimiser(initVec, GetMI, &optData);
-    nm->ReflectionParam(1e-10);
-    nm->ExpansionParam(1e-10);
-    nm->ContractionParam(1e-10);
-    nm->ShrinkageParam(1e-10);
     // Run the optimiser
     //bool success = optim::nm(x, GetMI, &optData, optiSettings);
     // clean up and return main
     delete gd;
     delete cg;
+    delete nm;
     return 0;
 }
